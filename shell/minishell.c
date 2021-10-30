@@ -1,3 +1,8 @@
+/* 
+ * Sistemas operativos 2021 
+ * Almaraz Fabricio, Buñes Juan.
+ * 
+ * */
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,47 +22,47 @@
 #define MAX_ARG 4
 
 
-/*retorna la cantidad de argumentos leidos en el comando pasado por parámetro.
-    a su vez, almacena dichos argumentos en un arreglo de strings.
+/*retorna la cantidad de arguments leidos en el command pasado por parámetro.
+    a su vez, almacena dichos arguments en un arreglo de strings.
 */
-int obtener_argumentos(char *comando, char *argumentos []){
+int get_arguments(char *command, char *arguments []){
     int cont = 0;
-    argumentos[cont] = strtok(comando," ");   //almacena en el primer elemento el nombre del comando.
-    while(argumentos[cont] != NULL && cont < MAX_ARG){    //mientras que haya elementos y los argumentos no superen la cantidad de 4.
+    arguments[cont] = strtok(command," ");   //almacena en el primer elemento el nombre del command.
+    while(arguments[cont] != NULL && cont < MAX_ARG){    //mientras que haya elementos y los arguments no superen la cantidad de 4.
         cont++;
-        argumentos[cont] = strtok(NULL," ");    //almacena el siguiente argumento del comando.
+        arguments[cont] = strtok(NULL," ");    //almacena el siguiente argumento del command.
     }
     return cont;
 }
 
-/*Función que analiza los argumentos escritos por el usuario y retorna -1 si no son válidos, en caso contrario
-retorna el identificador del comando ingresado.*/
-int argumentos_validos(char *argumentos [], int cant_argumentos){
-    int comando = ARG_INVALIDOS;
-    if(strcmp(argumentos[0],"rmdir") == 0 && (cant_argumentos > 1))
-        comando = RMDIR;
+/*Función que analiza los arguments escritos por el usuario y retorna -1 si no son válidos, en caso contrario
+retorna el identificador del command ingresado.*/
+int valid_arguments(char *arguments [], int cant){
+    int command = ARG_INVALIDOS;
+    if(strcmp(arguments[0],"rmdir") == 0 && (cant > 1))
+        command = RMDIR;
     else
-        if(strcmp(argumentos[0],"mkdir") == 0 && (cant_argumentos > 1))
-            comando = MKDIR;
+        if(strcmp(arguments[0],"mkdir") == 0 && (cant > 1))
+            command = MKDIR;
         else
-            if(strcmp(argumentos[0],"create") == 0 && (cant_argumentos > 1))
-                comando = CREATE;
+            if(strcmp(arguments[0],"create") == 0 && (cant > 1))
+                command = CREATE;
             else
-                if(strcmp(argumentos[0],"dirlist") == 0 && (cant_argumentos > 1))
-                    comando = DIRLIST;
+                if(strcmp(arguments[0],"dirlist") == 0 && (cant > 1))
+                    command = DIRLIST;
                 else
-                    if(strcmp(argumentos[0],"show") == 0 && (cant_argumentos > 1))
-                        comando = SHOW;
+                    if(strcmp(arguments[0],"show") == 0 && (cant > 1))
+                        command = SHOW;
                     else
-                        if(strcmp(argumentos[0],"chperm") == 0 && (cant_argumentos == 3))
-                            comando = CHPERM;
+                        if(strcmp(arguments[0],"chperm") == 0 && (cant == 3))
+                            command = CHPERM;
                         else
-                            if(strcmp(argumentos[0],"help") == 0 && (cant_argumentos == 1))
-                                comando = HELP;
+                            if(strcmp(arguments[0],"help") == 0 && (cant == 1))
+                                command = HELP;
                             else
-                                if(strcmp(argumentos[0],"quit") == 0 && (cant_argumentos == 1))
-                                    comando = QUIT;
-    return comando;
+                                if(strcmp(arguments[0],"quit") == 0 && (cant == 1))
+                                    command = QUIT;
+    return command;
 }
 
 int main(){
@@ -66,51 +71,51 @@ int main(){
     printf("******Escriba el comando 'help' para mostrar un listado con los comandos disponibles*****\n");
     printf("*****************************************************************************************\n"PRINT_RESET);
     print_path();    //imprime la ruta junto con el usuario actual
-    char comando[COM_MAX_SIZE]; //aquí se almacena el comando escrito por teclado por el usuario.
-    char *argumentos[MAX_ARG];    //sirve para almacenar los distintos argumentos que hay en el string comando.
+    char command[COM_MAX_SIZE]; //aquí se almacena el command escrito por teclado por el usuario.
+    char *arguments[MAX_ARG];    //sirve para almacenar los distintos arguments que hay en el string command.
     for(int i = 0; i < MAX_ARG; i++)
-        argumentos[i] = (char *)malloc(sizeof(char)*20);
+        arguments[i] = (char *)malloc(sizeof(char)*20);
     fflush(stdin); //limpio el buffer de entrada del teclado.
-    while(1){   //el programa no termina hasta que el usuario use el comando 'salir'
+    while(1){   //el programa no termina hasta que el usuario use el command 'salir'
         for(int i = 0; i < MAX_ARG; i++)
-            argumentos[i] = NULL;   //limpio el arreglo de argumentos antes de empezar una nueva iteración.
-        int cant_argumentos = 0;
-        scanf("%[^\n]s",comando);   //almacena en la variable comando todo lo que escriba el usuario hasta que presiona la tecla enter.
+            arguments[i] = NULL;   //limpio el arreglo de arguments antes de empezar una nueva iteración.
+        int cant = 0;
+        scanf("%[^\n]s",command);   //almacena en la variable command todo lo que escriba el usuario hasta que presiona la tecla enter.
         __fpurge(stdin);    //limpio el buffer del teclado.
         pid_t pid;
-        cant_argumentos = obtener_argumentos(comando,argumentos);   //obtengo la cantida de argumentos y los almaceno en la variable 'argumentos'.
-        int comando_id = argumentos_validos(argumentos,cant_argumentos);
-        if(comando_id == ARG_INVALIDOS){
+        cant = get_arguments(command,arguments);   //obtengo la cantida de arguments y los almaceno en la variable 'arguments'.
+        int command_id = valid_arguments(arguments,cant);
+        if(command_id == ARG_INVALIDOS){
             printf("El comando ingresado es inválido, escriba 'help' para ver la lista de comandos disponibles\n");
             print_path();
         }else{
-            if((pid = fork()) < 0)  //creo el proceso que se ocupa de  ejecutar el comando recibido por teclado.
+            if((pid = fork()) < 0)  //creo el proceso que se ocupa de  ejecutar el command recibido por teclado.
                 report_and_exit("FORK");
             if(pid == 0){   //estoy en el proceso hijo.
-                switch(comando_id){
+                switch(command_id){
                     case RMDIR:
-                        execv("rmdir",argumentos);
+                        execv("rmdir",arguments);
                         break;
                     case MKDIR:
-                        execv("mkdir",argumentos);
+                        execv("mkdir",arguments);
                         break;
                     case CREATE:
-                        execv("create",argumentos);
+                        execv("create",arguments);
                         break;
                     case DIRLIST:
-                        execv("dirlist",argumentos);
+                        execv("dirlist",arguments);
                         break;
                     case SHOW:
-                        execv("show",argumentos);
+                        execv("show",arguments);
                         break;
                     case CHPERM:
-                        execv("chperm",argumentos);
+                        execv("chperm",arguments);
                         break;
                     case HELP:
-                        execv("help",argumentos);
+                        execv("help",arguments);
                         break;
                     case QUIT:
-                        execv("quit",argumentos);
+                        execv("quit",arguments);
                         break;
                 }
             }
