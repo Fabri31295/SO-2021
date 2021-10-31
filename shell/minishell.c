@@ -67,9 +67,9 @@ int valid_arguments(char *arguments [], int cant){
 
 int main(){
     printf(PRINT_AMARILLO_B"*****************************************************************************************\n");
-    printf("**************************************--MINISHELL--**************************************\n");
-    printf("******Escriba el comando 'help' para mostrar un listado con los comandos disponibles*****\n");
-    printf("*****************************************************************************************\n"PRINT_RESET);
+    printf("                                        --MINISHELL--\n");
+    printf("        Escriba el comando 'help' para mostrar un listado con los comandos disponibles\n");
+    printf(" \n\n\n"PRINT_RESET);
     print_path();    //imprime la ruta junto con el usuario actual
     char command[COM_MAX_SIZE]; //aquí se almacena el command escrito por teclado por el usuario.
     char *arguments[MAX_ARG];    //sirve para almacenar los distintos arguments que hay en el string command.
