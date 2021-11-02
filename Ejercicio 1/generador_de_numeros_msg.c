@@ -17,6 +17,11 @@
 #include <sys/msg.h>
 #include <errno.h>
 
+#define CONTROL 4
+#define GENERADOR 1
+#define ESCRITOR1 2 
+#define ESCRITOR2 3
+
 void generador(int id);
 void sincronizador(int msgid);
 void escritor(int id);
@@ -26,7 +31,6 @@ int random_number();
 typedef struct message {
 	long type;
 	int number;
-	int ctrl;
 } tMessage;
 
 #define KEY 34251
@@ -39,88 +43,88 @@ int random_number() {
 }
 
 void generador(int id) {
-	tMessage response;
+	tMessage message;
 	int msgid = msgget(KEY, 0666);
 
 	for(int i = 0; i < 4; i++) {
-		response.number = random_number();
-		response.type = 1;
-		printf("G%d: generando: %d ...\n",id,response.number);
-		msgsnd(msgid,&response,SIZE_MSG,0);
+		message.number = random_number();
+		message.type = 1;
+		printf("G%d: generando: %d ...\n",id,message.number);
+		msgsnd(msgid,&message,SIZE_MSG,0);
 		fflush(stdout);
 		sleep(1);
 	}
 }
 
 void sincronizador(int msgid) {
-	tMessage request, control, response;
-	int var_control = 1;
+	tMessage msg_generador, msg_control, msg_escritor;
+	int destino = 1;
 
 	for(int i = 0; i < 8; i++) {
-		msgrcv(msgid, &request, SIZE_MSG, 1, 0);
-		if(msgrcv(msgid, &control, SIZE_MSG, 4, IPC_NOWAIT) == -1) {
-    		/* Possible error */
+		msgrcv(msgid, &msg_generador, SIZE_MSG, 1, 0);
+		if(msgrcv(msgid, &msg_control, SIZE_MSG, 4, IPC_NOWAIT) == -1) {
+    		
     		if (errno == ENOMSG) {
-        		//printf("No message in the queue\n");
+        		/* error */
     		}
     		else {
-        		printf("Error receiving message: %s\n", strerror(errno));
+        		printf("Error al recibir el mensaje: %s\n", strerror(errno));
     		}
 		}
 		else {
-    		printf("Cambio en la variable de control -->  %d\n",control.number);
-			var_control = control.number;
+    		printf("Cambio en la variable de control -->  %d\n",msg_control.number);
+			destino = msg_control.number;
 		}
 
-		response.ctrl = var_control;
-
-		if(var_control == 1) {
-			response.type = 2;
-		} else if (var_control == 2){
-			response.type = 3;
+		if(destino == 1) {
+			msg_escritor.type = ESCRITOR1;
+		} else if (destino == 2){
+			msg_escritor.type = ESCRITOR2;
 		}
-		response.number = request.number;
-		//printf("Envio %d para el escritor %d\n",response.number,var_control);
-		msgsnd(msgid, &response, SIZE_MSG, 0);
+		msg_escritor.number = msg_generador.number;
+		msgsnd(msgid, &msg_escritor, SIZE_MSG, 0);
 		sleep(1);
 	}
 }
 
 void escritor(int id) { 
-	tMessage request;
+	tMessage msg_sync;
 	int msgid = msgget(KEY, 0666);
 	FILE *file;
 
 	while(1) {
-		if(id == 1) {
-			msgrcv(msgid, &request, SIZE_MSG, 2, 0);
+		if(id == ESCRITOR1) {
+			msgrcv(msgid, &msg_sync, SIZE_MSG, ESCRITOR1, 0);
 			file = fopen("Salida1.txt","a+");
-			printf("Escritor 1 recibe: %d\n",request.number);
-			fprintf(file,"%d\n",request.number);
+			printf("Escritor 1 recibe: %d\n",msg_sync.number);
+			fprintf(file,"%d\n",msg_sync.number);
 			fclose(file);
-		} else if(id == 2) {
-			msgrcv(msgid, &request, SIZE_MSG, 3, 0);
+		} else if(id == ESCRITOR2) {
+			msgrcv(msgid, &msg_sync, SIZE_MSG, ESCRITOR2, 0);
 			file = fopen("Salida2.txt","a+");
-			printf("Escritor 2 recibe: %d\n",request.number);	
-			fprintf(file,"%d\n",request.number);
+			printf("Escritor 2 recibe: %d\n",msg_sync.number);	
+			fprintf(file,"%d\n",msg_sync.number);
 			fclose(file);
 		}
 	}
 }
 
 void control() {
-	tMessage control;
+	tMessage msg_control;
 	int msgid = msgget(KEY, 0666);
-	int variable = 1;
+	int destino = 1;
 
 	for(int i = 0; i < 3; i++) {
 		fflush(stdout);
 		sleep(2);
-		if(variable == 1) variable = 2;
-		else variable = 1;
-		control.type = 4;
-		control.number = variable;
-		msgsnd(msgid, &control, SIZE_MSG, 0);
+		if(destino == 1)
+			 destino = 2;
+		else 
+			destino = 1;
+
+		msg_control.type = 4;
+		msg_control.number = destino;
+		msgsnd(msgid, &msg_control, SIZE_MSG, 0);
 	}
 }
 
