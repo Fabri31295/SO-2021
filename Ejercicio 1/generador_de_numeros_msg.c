@@ -21,7 +21,6 @@ void generador(int id);
 void sincronizador(int msgid);
 void escritor(int id);
 void control();
-void delete_queue();
 int random_number();
 
 typedef struct message {
