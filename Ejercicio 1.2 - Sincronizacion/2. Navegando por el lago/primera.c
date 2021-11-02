@@ -13,40 +13,44 @@
 #include <sys/ipc.h>
 #include <sys/types.h>
 
+#define TURISTA 0
+#define BUSINESS 1
+#define PRIMERA 2
+
+#define PUEDE_COMPRAR 4
+#define ENTRO_AL_BARCO 8
+#define PUEDE_SALIR_BARCO 3
+
 struct msg{
 	long tipo;
-	sem_t salida;
-	sem_t sem_turista;
-	sem_t sem_business;
-	sem_t sem_primera;
-	sem_t entrada;
-	sem_t ventaTicket;
-}mensaje;
+}tipoPasajero,cola;
 
 int main(){
 	int longitud=sizeof(struct msg)-sizeof(long);
-	key_t key;
+	key_t key,key2;
 	key=ftok("Sincronizacion2procesos",10);
 	int idmsg=msgget(key, 0666);
+	key2=ftok("Sincronizacion2procesos",50);
+	int idmsg2=msgget(key2, 0666);
 	
 	//----Seccion critica entrada al barco
-	msgrcv(idmsg,&mensaje,longitud,1,0);
-	sem_wait(&mensaje.entrada);
+	msgrcv(idmsg,&tipoPasajero,longitud,PRIMERA,0);
+	msgrcv(idmsg2,&cola,longitud,PUEDE_COMPRAR,0);
+	printf("Se vendio un ticket de clase Primera\n");
 	fflush(stdout);
 	sleep(1);
 	printf("Pasajero clase Primera entro al barco\n");
-	sem_post(&mensaje.ventaTicket);
-	msgsnd(idmsg,&mensaje,longitud,0);
+	cola.tipo=ENTRO_AL_BARCO;
+	msgsnd(idmsg2,&cola,longitud,0);
 	//------------------------------------
 	
 	//----Seccion critica salida del barco
-	sem_wait(&mensaje.salida);
+	msgrcv(idmsg,&cola,longitud,PUEDE_SALIR_BARCO,0);
 	printf("Pasajero clase Primera salio del barco\n");
 	fflush(stdout);
 	sleep(1);
-	sem_post(&mensaje.sem_primera);
-	sem_post(&mensaje.salida);
-	pthread_exit(0);
+	cola.tipo=PUEDE_SALIR_BARCO;
+	msgsnd(idmsg2,&cola,longitud,0);
 	//------------------------------------	
 	
 	

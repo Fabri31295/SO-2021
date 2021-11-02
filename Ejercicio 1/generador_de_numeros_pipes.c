@@ -18,6 +18,7 @@
 
 void generador();
 void sincronizador();
+void control();
 void escritor1();
 void escritor2();
 int random_number();

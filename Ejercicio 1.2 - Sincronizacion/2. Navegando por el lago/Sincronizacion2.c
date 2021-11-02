@@ -10,6 +10,15 @@
 #include <unistd.h>
 #include <time.h>
 
+#define TURISTA 0
+#define BUSINESS 1
+#define PRIMERA 2
+
+#define MAX_TURISTA 50
+#define MAX_BUSSINESS 30
+#define MAX_PRIMERA 20
+#define MAX_PASAJEROS 100
+
 sem_t salida;
 sem_t sem_turista;
 sem_t sem_business;
@@ -91,21 +100,21 @@ void *primera(){
 int main(){
 	sem_init(&entrada,0,0);
 	sem_init(&ventaTicket,0,0);
-	sem_init(&sem_turista,0,50);
-	sem_init(&sem_business,0,30);
-	sem_init(&sem_primera,0,20);
+	sem_init(&sem_turista,0,MAX_TURISTA);
+	sem_init(&sem_business,0,MAX_BUSSINESS);
+	sem_init(&sem_primera,0,MAX_PRIMERA);
 	sem_init(&salida,0,0);
 	
 	srand(time(NULL));
-	pthread_t pasajero[100];
+	pthread_t pasajero[MAX_PASAJEROS];
 	while(1){
 			
 		int pasajerosEnBarco=0;
 		printf("Se comienza a vender los tickets y el barco vacio comienza a llenarse...\n");
 		
-		while(pasajerosEnBarco<100){
+		while(pasajerosEnBarco<MAX_PASAJEROS){
 			int tipoPasajero=rand()%3; //0 turista, 1 business, 2 primera clase
-			if (tipoPasajero==0){
+			if (tipoPasajero==TURISTA){
 				if(sem_trywait(&sem_turista)==0){ //Hay lugar en el barco para turistas
 					sem_post(&entrada);
 					printf("Se vendio un ticket de clase Turista\n");
@@ -116,7 +125,7 @@ int main(){
 					sem_post(&ventaTicket);
 				}
 			}
-			if (tipoPasajero==1){
+			if (tipoPasajero==BUSINESS){
 				if(sem_trywait(&sem_business)==0){ //Hay lugar en el barco para business
 					sem_post(&entrada);
 					printf("Se vendio un ticket de clase Business\n");
@@ -127,7 +136,7 @@ int main(){
 					sem_post(&ventaTicket);
 				}
 			}
-			if (tipoPasajero==2){
+			if (tipoPasajero==PRIMERA){
 				if(sem_trywait(&sem_primera)==0){ //Hay lugar en el barco para primera
 					sem_post(&entrada);
 					printf("Se vendio un ticket de clase Primera\n");
@@ -142,7 +151,7 @@ int main(){
 		}
 		
 		
-		if(pasajerosEnBarco==100){
+		if(pasajerosEnBarco==MAX_PASAJEROS){
 			printf("Barco lleno, parte del puerto...\n");
 			fflush(stdout);
 			sleep(5);
@@ -153,12 +162,13 @@ int main(){
 		printf("Barco llego a destino, comienza a vaciarse...\n");
 		sem_post(&salida);
 		
-		for(int i=0; i<100 ;i++){
+		for(int i=0; i<MAX_PASAJEROS ;i++){
 			pthread_join(pasajero[i],NULL);
 		}
 		
 		sem_wait(&salida);
 		printf("Barco vacio.\n");
+		printf("-------------------------------------------\n");
 	}
 	return 0;
 }
