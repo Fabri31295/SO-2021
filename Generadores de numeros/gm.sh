@@ -1,3 +1,3 @@
 #!/bin/bash
-gcc -Wall gen_messages.c -o gm
+gcc gen_messages.c -o gm
 ./gm
