@@ -1,28 +1,8 @@
-/* 
- * Sistemas operativos 2021 
- * Almaraz Fabricio, Buñes Juan.
- * 
- * */
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/msg.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
+#include "shared.h"
 
-#define TURISTA 0
-#define BUSINESS 1
-#define PRIMERA 2
-
-#define PUEDE_COMPRAR 4
-#define ENTRO_AL_BARCO 8
-#define PUEDE_SALIR_BARCO 3
 #define MAX_TURISTA 50
-#define MAX_BUSSINESS 30
-#define MAX_PRIMERA 20
+#define MAX_BUSINESS 30
+#define MAX_PRIMERA 10
 #define MAX_PASAJEROS 100
 
 
@@ -34,10 +14,10 @@ struct msg{
 int main(){
 	int longitud=sizeof(struct msg)-sizeof(long);
 	key_t key,key2;
-	key=ftok("Sincronizacion2procesos",10);
-	key2=ftok("Sincronizacion2procesos",50);
-	int idmsg=msgget(key, 0666 | IPC_CREAT);
-	int idmsg2=msgget(key2, 0666 | IPC_CREAT);
+	key=ftok("/Sincronizacion2procesos",10);
+	key2=ftok("/Sincronizacion2procesos",50);
+	int idmsg = msgget(key, 0666|IPC_CREAT);
+	int idmsg2 = msgget(key2, 0666|IPC_CREAT);
 	
 	srand(time(NULL));
 	
@@ -48,7 +28,7 @@ int main(){
 		int cantBusiness=0;
 		int cantPrimera=0;
 		
-		while(pasajerosEnBarco<MAX_PASAJEROS){		
+		while(pasajerosEnBarco<MAX_PASAJEROS){	
 			tipoPasajero.tipo=rand()%3; //0 turista, 1 business, 2 primera
 				if(tipoPasajero.tipo==PRIMERA){
 					cola.tipo=PUEDE_COMPRAR;
@@ -56,7 +36,7 @@ int main(){
 					msgsnd(idmsg2,&cola,longitud,0);
 					if(cantPrimera<MAX_PRIMERA){
 						if(fork()==0){
-							char *args[]={"./pri",NULL};
+							char *args[]={"./primera",NULL};
 							execv(args[0],args);
 						}
 						pasajerosEnBarco=pasajerosEnBarco+1;
@@ -69,9 +49,9 @@ int main(){
 					cola.tipo=PUEDE_COMPRAR;
 					msgsnd(idmsg,&tipoPasajero,longitud,0);
 					msgsnd(idmsg2,&cola,longitud,0);
-					if(cantBusiness<MAX_BUSSINESS){
+					if(cantBusiness<MAX_BUSINESS){
 						if(fork()==0){
-							char *args[]={"./bus",NULL};
+							char *args[]={"./business",NULL};
 							execv(args[0],args);
 						}
 						pasajerosEnBarco=pasajerosEnBarco+1;
@@ -86,7 +66,7 @@ int main(){
 					msgsnd(idmsg2,&cola,longitud,0);
 					if(cantTurista<MAX_TURISTA){
 						if(fork()==0){
-							char *args[]={"./tur",NULL};
+							char *args[]={"./turista",NULL};
 							execv(args[0],args);
 						}
 						pasajerosEnBarco=pasajerosEnBarco+1;
