@@ -48,7 +48,6 @@ void generador(int id) {
 	close(p_write2[1]);
 	close(p_ctrl[1]);
 	
-	char str[4];
 	int number;
 	while(1) {
 		read(p_signal[0],&request,SIZE_MSG);
