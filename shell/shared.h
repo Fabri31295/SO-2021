@@ -26,6 +26,8 @@
 #define HELP 6
 #define QUIT 7
 #define ARG_INVALIDOS -1
+#define COM_MAX_SIZE 30
+#define MAX_ARG 4
 
 #define PRINT_ROJO_B "\x1b[1;31m"
 #define PRINT_VERDE_B "\x1b[1;32m"
