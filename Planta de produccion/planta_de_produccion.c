@@ -16,6 +16,7 @@ sem_t sem_c;
 sem_t sem_d;
 sem_t sem_e;
 sem_t sem_f;
+sem_t sem_aux;
 
 pthread_t thread_a;
 pthread_t thread_b;
@@ -43,10 +44,6 @@ void *printB(){
 		sleep(1);
 		printf("%s","B");
 		sem_post(&sem_c);
-		sem_wait(&sem_b);
-		fflush(stdout);
-		sleep(1);
-		printf("%s","B");
 		sem_post(&sem_d);
 	}
 }
@@ -54,6 +51,8 @@ void *printB(){
 void *printC(){
 	while(1){
 		sem_wait(&sem_c);
+		sem_wait(&sem_c);
+		sem_wait(&sem_aux);
 		fflush(stdout);
 		sleep(3);
 		printf("%s","C");
@@ -64,10 +63,12 @@ void *printC(){
 void *printD(){
 	while(1){
 		sem_wait(&sem_d);
+		sem_wait(&sem_d);
 		fflush(stdout);
 		sleep(7);
 		printf("%s","D");
 		sem_post(&sem_e);
+		sem_post(&sem_aux);
 	}
 }
 
@@ -95,10 +96,11 @@ int main(){
 		
 	sem_init(&sem_a,0,1);
 	sem_init(&sem_b,0,0);
-	sem_init(&sem_c,0,0);
+	sem_init(&sem_c,0,1);
 	sem_init(&sem_d,0,0);
 	sem_init(&sem_e,0,0);
 	sem_init(&sem_f,0,0);
+	sem_init(&sem_aux,0,1);
 	pthread_attr_init(&attr);
 	
 	pthread_create(&thread_a,&attr,printA,NULL);
