@@ -23,7 +23,7 @@ void show_directory(char *route) {
 	print_path();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	show_directory(int argv[1]);
 	return 0;
 }
