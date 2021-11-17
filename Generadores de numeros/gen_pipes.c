@@ -77,14 +77,14 @@ void sincronizador() {
     for(int i = 0; i < 12; i++) {
         read(p_number[0], &request, SIZE_MSG);
 	
-	if(request.number == -1)  // mensaje del controlador
-	    salida = request.escritor;
-	else {
-	    response.number = request.number;
-	    if(salida == ESCRITOR1) 
-		write(p_write1[1], &response, SIZE_MSG);
-	    else 
-		write(p_write2[1], &response, SIZE_MSG);
+	    if(request.number == -1)  // mensaje del controlador
+	      salida = request.escritor;
+    	else {
+	      response.number = request.number;
+	      if(salida == ESCRITOR1) 
+	    	write(p_write1[1], &response, SIZE_MSG);
+	     else 
+		    write(p_write2[1], &response, SIZE_MSG);
 	}
 	
     }

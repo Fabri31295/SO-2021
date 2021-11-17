@@ -24,7 +24,7 @@ void show_directory(char *route) {
 }
 
 int main(int argc, char *argv[]) {
-	show_directory(int argv[1]);
+	show_directory(argv[1]);
 	return 0;
 }
 

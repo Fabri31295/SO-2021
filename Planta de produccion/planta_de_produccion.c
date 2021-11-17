@@ -52,7 +52,6 @@ void *printC(){
 	while(1){
 		sem_wait(&sem_c);
 		sem_wait(&sem_c);
-		sem_wait(&sem_aux);
 		fflush(stdout);
 		sleep(3);
 		printf("%s","C");
@@ -68,7 +67,6 @@ void *printD(){
 		sleep(7);
 		printf("%s","D");
 		sem_post(&sem_e);
-		sem_post(&sem_aux);
 	}
 }
 
