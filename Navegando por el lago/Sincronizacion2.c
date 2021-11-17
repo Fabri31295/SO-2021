@@ -29,7 +29,6 @@ void *turista(){
 			sem_wait(&entrada);
 			fflush(stdout);
 			sleep(1);
-			sem_wait(&asientosVacios_barco);
 			sem_post(&asientosLlenos_barco);
 			printf("Pasajero clase Turista compro ticket y entro al barco\n");
 			sem_post(&entrada);
@@ -42,7 +41,6 @@ void *turista(){
 			sleep(1);
 			sem_post(&asientosVacios_turista);
 			sem_post(&asientosVacios_barco);
-			sem_wait(&asientosLlenos_barco);
 			sem_post(&salida);	
 			//------------------------------------
 		}
@@ -57,7 +55,6 @@ void *business(){
 			sem_wait(&entrada);
 			fflush(stdout);
 			sleep(1);
-			sem_wait(&asientosVacios_barco);
 			sem_post(&asientosLlenos_barco);
 			printf("Pasajero clase Business compro ticket y entro al barco\n");
 			sem_post(&entrada);
@@ -70,7 +67,6 @@ void *business(){
 			sleep(1);
 			sem_post(&asientosVacios_business);
 			sem_post(&asientosVacios_barco);
-			sem_wait(&asientosLlenos_barco);
 			sem_post(&salida);
 			//------------------------------------
 		}
@@ -85,7 +81,6 @@ void *primera(){
 			sem_wait(&entrada);
 			fflush(stdout);
 			sleep(1);
-			sem_wait(&asientosVacios_barco);
 			sem_post(&asientosLlenos_barco);
 			printf("Pasajero clase Primera compro ticket y entro al barco\n");
 			sem_post(&entrada);
@@ -98,7 +93,6 @@ void *primera(){
 			sleep(1);
 			sem_post(&asientosVacios_primera);
 			sem_post(&asientosVacios_barco);
-			sem_wait(&asientosLlenos_barco);
 			sem_post(&salida);	
 			//------------------------------------
 		}
@@ -139,9 +133,9 @@ int main(){
 		
 		printf("Se comienza a vender los tickets y el barco vacio comienza a llenarse...\n");
 		
-		//Cicla hasta que el barco este lleno, es decir, no hay asientos vacios
-		while(sem_trywait(&asientosVacios_barco)==0){
-			sem_post(&asientosVacios_barco);
+		//Cicla 100 veces esperando 100 veces al semaforo asientosLlenos_Barco
+		for(int i=0; i<100;i++){
+			sem_wait(&asientosLlenos_barco);	
 		}
 		sem_wait(&entrada);//Se deshabilita la venta de tickets y entrada al barco
 		printf("Barco lleno, parte del puerto...\n");
@@ -151,9 +145,9 @@ int main(){
 		printf("Barco llego a destino, comienza a vaciarse...\n");
 		sem_post(&salida);//Se habilita la salida del barco
 		
-		//Cicla hasta que el barco esta vacio, es decir, no hay asientos llenos
-		while(sem_trywait(&asientosLlenos_barco)==0){
-			sem_post(&asientosLlenos_barco);
+		//Cicla 100 veces esperando 100 veces al semaforo asientosVacios_Barco
+		for(int i=0; i<100;i++){
+			sem_wait(&asientosVacios_barco);	
 		}
 		
 		sem_wait(&salida);//Se deshabilita la salida del barco
