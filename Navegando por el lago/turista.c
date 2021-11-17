@@ -1,38 +1,38 @@
 #include "shared.h"
 
-struct msg{
+struct pasajeros{
 	long tipo;
-}tipoPasajero,cola;
+}spasajeros;
 
 int main(){
-	int longitud=sizeof(struct msg)-sizeof(long);
-	key_t key,key2;
-	key=ftok("/Sincronizacion2procesos",10);
-	key2=ftok("/Sincronizacion2procesos",50);
-	int idmsg = msgget(key, 0666);
-	int idmsg2 = msgget(key2, 0666);
+	int longitud=sizeof(struct pasajeros)-sizeof(long);
+	int idmsg2 = msgget(KEY2, 0666);
 	
-	//----Seccion critica entrada al barco
-	msgrcv(idmsg,&tipoPasajero,longitud,TURISTA,0);
-	msgrcv(idmsg2,&cola,longitud,PUEDE_COMPRAR,0);
-	printf("Se vendio un ticket de clase Turista\n");
-	fflush(stdout);
-	sleep(1);
-	printf("Pasajero clase Turista entro al barco\n");
-	cola.tipo=ENTRO_AL_BARCO;
-	msgsnd(idmsg2,&cola,longitud,0);
-	//------------------------------------
-	
-	//----Seccion critica salida del barco
-	msgrcv(idmsg,&cola,longitud,PUEDE_SALIR_BARCO,0);
-	printf("Pasajero clase Turista salio del barco\n");
-	fflush(stdout);
-	sleep(1);
-	cola.tipo=PUEDE_SALIR_BARCO;
-	msgsnd(idmsg2,&cola,longitud,0);
-	//------------------------------------	
-	
+	while(1){
+		
+		//----Entrada al barco
+		if(msgrcv(idmsg2,&spasajeros,longitud,PUEDE_ENTRAR_TURISTA,IPC_NOWAIT)!=-1){
+			msgrcv(idmsg2,&spasajeros,longitud,PUEDE_ENTRAR_BARCO,0);
+			printf("Se vendio un ticket de clase Turista\n");
+			fflush(stdout);
+			sleep(1);
+			printf("Pasajero clase Turista entro al barco\n");
+			msgrcv(idmsg2,&spasajeros,longitud,BARCO_NO_LLENO,0);
+			spasajeros.tipo=PUEDE_ENTRAR_BARCO;
+			msgsnd(idmsg2,&spasajeros,longitud,0);
+			//------------------------------------
+			
+			//----Salida del barco
+			msgrcv(idmsg2,&spasajeros,longitud,PUEDE_SALIR_BARCO,0);
+			msgrcv(idmsg2,&spasajeros,longitud,BARCO_NO_VACIO,0);
+			printf("Pasajero clase Turista salio del barco\n");
+			fflush(stdout);
+			sleep(1);
+			spasajeros.tipo=PUEDE_SALIR_BARCO;
+			msgsnd(idmsg2,&spasajeros,longitud,0);
+			//------------------------------------	
+		}
+	}
 	
 	return 0;
 }
-
